@@ -43,7 +43,7 @@ app.get("/create-token" , createToken ) ;
 
 // ✅ Origin Security Middleware (After cors & cookie parsing)
 app.use(AuthByOriginMiddleware);
-app.use(verifyCookie);
+// app.use(verifyCookie);
 
 // ✅ Routes
 app.use("/api", scrapeRoutes);
