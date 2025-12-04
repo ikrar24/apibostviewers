@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// 🔑 Gemini Fallback API Key
+// 🔑 Gemini API Keys & URLs
 const GEMINI_KEY = process.env.GEMINI_KEY;
-const GEMINI_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+const GEMINI_PRO_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_FLASH_API = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
 // 🔄 OpenRouter Models Priority
 const MODELS = [
@@ -54,8 +56,13 @@ const extractSeoScores = (text = "") => {
   // 🧩 Auto-calculate overall if missing
   let computedOverall = overall;
   if (!computedOverall) {
-    const all = [title, description, tags, hashtags].filter((n) => typeof n === "number");
-    if (all.length) computedOverall = Math.round(all.reduce((a, b) => a + b, 0) / all.length);
+    const all = [title, description, tags, hashtags].filter(
+      (n) => typeof n === "number"
+    );
+    if (all.length)
+      computedOverall = Math.round(
+        all.reduce((a, b) => a + b, 0) / all.length
+      );
   }
 
   return {
@@ -65,6 +72,26 @@ const extractSeoScores = (text = "") => {
     hashtags: hashtags ?? 0,
     overall: computedOverall ?? 0,
   };
+};
+
+// 🧠 Gemini Common Caller (used by Pro & Flash)
+const callGemini = async (apiUrl, prompt) => {
+  const geminiResponse = await axios.post(apiUrl, {
+    contents: [
+      {
+        parts: [{ text: prompt }],
+      },
+    ],
+  });
+
+  const candidates = geminiResponse.data?.candidates;
+  if (!candidates || !candidates.length) {
+    throw new Error("Gemini returned no candidates");
+  }
+
+  const text = candidates[0]?.content?.parts?.[0]?.text || "No result text found";
+  const seoScores = extractSeoScores(text);
+  return { text, seoScores };
 };
 
 // 🔍 Main Analysis Function
@@ -96,8 +123,6 @@ Output Format (strictly follow this, no greeting or intro):
   // 🔁 Try each OpenRouter model
   for (const model of MODELS) {
     try {
-      // console.log(`🚀 Trying model: ${model}`);
-
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 25000);
 
@@ -121,8 +146,6 @@ Output Format (strictly follow this, no greeting or intro):
       const result = response.data?.choices?.[0]?.message?.content;
       if (result) {
         const seoScores = extractSeoScores(result);
-        // console.log(`✅ Success from model: ${model}`);
-        // console.log("Extracted SEO Scores:", seoScores);
         return { success: true, model, result, seoScores };
       } else {
         throw new Error("Empty response");
@@ -135,28 +158,24 @@ Output Format (strictly follow this, no greeting or intro):
   }
 
   // 🧠 Gemini fallback
-  // console.log("⚠️ All OpenRouter models failed. Switching to Gemini fallback...");
+  console.log("⚠️ All OpenRouter models failed. Switching to Gemini (Pro → Flash fallback)...");
 
+  // 🔹 1st: Try Gemini Pro
   try {
-    const geminiResponse = await axios.post(GEMINI_API, {
-      contents: [
-        {
-          parts: [{ text: prompt }],
-        },
-      ],
-    });
+    const { text, seoScores } = await callGemini(GEMINI_PRO_API, prompt);
+    console.log("✅ Gemini Pro success");
+    return { success: true, provider: "gemini-pro", result: text, seoScores };
+  } catch (proError) {
+    console.error("❌ Gemini Pro failed, trying Flash...", proError.response?.data || proError.message);
+  }
 
-    const candidates = geminiResponse.data?.candidates;
-    if (candidates && candidates.length > 0) {
-      const text = candidates[0]?.content?.parts?.[0]?.text || "No result text found";
-      const seoScores = extractSeoScores(text);
-      // console.log("✅ Gemini fallback success");
-      return { success: true, result: text, seoScores };
-    } else {
-      throw new Error("Gemini returned no candidates");
-    }
+  // 🔹 2nd: If Pro fails, try Gemini Flash
+  try {
+    const { text, seoScores } = await callGemini(GEMINI_FLASH_API, prompt);
+    console.log("✅ Gemini Flash success");
+    return { success: true, provider: "gemini-flash", result: text, seoScores };
   } catch (geminiError) {
-    console.error("❌ Gemini fallback failed:", geminiError.message);
+    console.error("❌ Gemini (Pro & Flash) both failed:", geminiError.message);
     return { success: false, error: "Internal Error" };
   }
 };

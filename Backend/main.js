@@ -14,6 +14,7 @@ import { startCleanupJob } from "./src/utils/cronJob.js";
 import cookieParser from "cookie-parser";
 import passwordRoute from "./src/routes/passwordRouts.js"
 import downloadRoutes from "./src/routes/downloadRoutes.js"
+import thumbnailRoute from "./src/routes/thumbnailRoute.js"
 import AuthByOriginMiddleware from "./middleware/AuthByOriginMiddleware.js";
 import {createToken} from "./src/Auth/createToken.js";
 import verifyCookie from "./middleware/AuthCheck.js";
@@ -42,7 +43,7 @@ connection();
 app.get("/create-token" , createToken ) ;
 
 // ✅ Origin Security Middleware (After cors & cookie parsing)
-app.use(AuthByOriginMiddleware);
+// app.use(AuthByOriginMiddleware);
 // app.use(verifyCookie);
 
 // ✅ Routes
@@ -56,6 +57,7 @@ app.use("/api", titleSuggetionRoutes);
 app.use("/api/images", imageRoutes);
 app.use("/api/user", UserRouter);
 app.use("/api/download", downloadRoutes);
+app.use("/api", thumbnailRoute);
 
 // ✅ Default Route
 app.get("/", (req, res) => {
