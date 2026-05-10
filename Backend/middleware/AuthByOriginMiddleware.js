@@ -5,7 +5,7 @@ dotenv.config();
 const AuthByOriginMiddleware = async (req, res, next) => {
   try {
     // Example: origin check
-    const allowedOrigins = ["http://localhost:3000", "https://yourdomain.com"];
+    const allowedOrigins = ["http://localhost:3000", "https://bostviwes.netlify.app/"];
 
     const origin = req.headers.origin;
 
