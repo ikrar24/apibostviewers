@@ -26,7 +26,7 @@ const app = express();
 // ✅ First: Apply CORS
 app.use(cors({
   origin: [
-    "https://bostviewers.onrender.com",
+    "https://bostviwes.netlify.app/",
     "http://localhost:3000",
   ],
   credentials: true,
@@ -47,7 +47,7 @@ app.get("/create-token" , createToken ) ;
 // app.use(verifyCookie);
 
 // ✅ Routes
-app.use("/api", scrapeRoutes);
+app.use("/api", scrapeRoutes, console.log("Hit"));
 app.use("/api", passwordRoute);
 app.use("/api", CheckOldScrapeRoute);
 app.use("/api", thumbnailsDownloadRoute);
