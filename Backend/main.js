@@ -47,7 +47,7 @@ app.get("/create-token" , createToken ) ;
 // app.use(verifyCookie);
 
 // ✅ Routes
-app.use("/api", scrapeRoutes, console.log("Hit"));
+app.use("/api", scrapeRoutes);
 app.use("/api", passwordRoute);
 app.use("/api", CheckOldScrapeRoute);
 app.use("/api", thumbnailsDownloadRoute);
@@ -68,5 +68,5 @@ startCleanupJob();
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+ console.log(`✅ Server running on http://localhost:${PORT}`);
 });
