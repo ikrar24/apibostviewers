@@ -34,6 +34,12 @@ function Page() {
       <HowTiWork />
       <BoostViewsExplanation />
       <Faq />
+//for de bug
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>
+  eruda.init();
+</script>
+  
     </>
   );
 }
