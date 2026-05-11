@@ -12,21 +12,21 @@ import imageRoutes from "./src/routes/imageRoutes.js";
 import UserRouter from "./src/routes/UserRouter.js";
 import { startCleanupJob } from "./src/utils/cronJob.js";
 import cookieParser from "cookie-parser";
-import passwordRoute from "./src/routes/passwordRouts.js"
-import downloadRoutes from "./src/routes/downloadRoutes.js"
-import thumbnailRoute from "./src/routes/thumbnailRoute.js"
+import passwordRoute from "./src/routes/passwordRouts.js";
+import downloadRoutes from "./src/routes/downloadRoutes.js";
+import thumbnailRoute from "./src/routes/thumbnailRoute.js";
 import AuthByOriginMiddleware from "./middleware/AuthByOriginMiddleware.js";
-import {createToken} from "./src/Auth/createToken.js";
+import { createToken } from "./src/Auth/createToken.js";
 import verifyCookie from "./middleware/AuthCheck.js";
 
-// after express.json() 
 dotenv.config();
+
 const app = express();
 
-// ✅ First: Apply CORS
+// ✅ CORS
 app.use(cors({
   origin: [
-    "https://bostviwes.netlify.app/",
+    "https://bostviwes.netlify.app",
     "http://localhost:3000",
   ],
   credentials: true,
@@ -36,13 +36,21 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ Request Logger Middleware
+app.use((req, res, next) => {
+  console.log(
+    `🔥 ${req.method} Request Hit => ${req.originalUrl} | Time: ${new Date().toLocaleString()}`
+  );
+  next();
+});
+
 // ✅ Database Connection
 connection();
 
-// auth token 
-app.get("/create-token" , createToken ) ;
+// auth token
+app.get("/create-token", createToken);
 
-// ✅ Origin Security Middleware (After cors & cookie parsing)
+// ✅ Security Middleware
 // app.use(AuthByOriginMiddleware);
 // app.use(verifyCookie);
 
@@ -67,6 +75,7 @@ app.get("/", (req, res) => {
 startCleanupJob();
 
 const PORT = process.env.PORT || 4000;
+
 app.listen(PORT, () => {
- console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });
