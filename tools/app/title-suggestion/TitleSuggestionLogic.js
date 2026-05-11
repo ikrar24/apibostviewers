@@ -20,7 +20,7 @@ function TitleSuggestionLogic() {
   const [markdownText, setMarkdownText] = useState("");
   const [loading, setLoading] = useState(false);
 // base url 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" ;
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apibostviewers.onrender.com/" ;
   
 // viwes counter 
 useEffect(() => {
