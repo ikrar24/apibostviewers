@@ -1,7 +1,7 @@
 export const baseUrl =
   process.env.NODE_ENV === "production"
     ? "https://bostviewers.com" 
-    : "http://localhost:4000" || process.env.NEXT_PUBLIC_BASE_URL ;
+    : "https://apibostviewers.onrender.com" || process.env.NEXT_PUBLIC_BASE_URL ;
 
 export async function createToken() {
   try {
