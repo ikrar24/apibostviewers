@@ -145,6 +145,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:4000" ;
           );
 
           const backendData = res.data?.userYoutubeDeatails;
+          console.log(backendData)
           const isUpdated =
             backendData &&
             (backendData.title !== cached.user?.title ||
